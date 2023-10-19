@@ -1,0 +1,95 @@
+import pygame
+from time import sleep
+pygame.init()
+HEIGHT = 200
+screen = pygame.display.set_mode((1200, 700))
+player = pygame.Rect((100, 100), (50, HEIGHT))
+enemy = pygame.Rect((1100, 100), (50, HEIGHT))
+VEL = 10
+WHITE = (255, 255, 255)
+FPS = 60
+fpsClock = pygame.time.Clock()
+speed = [-3, -3]
+ball_rect = pygame.Rect((600, 350), (50, 50))
+ball_rect = pygame.draw.rect(screen, (0, 0, 0), ball_rect)
+ball = pygame.draw.circle(screen, WHITE, (600, 350), 30)
+player1_score = 0
+player2_score = 0
+text_font = pygame.font.SysFont("Arial", 30)
+
+
+def text_draw(text, font, color, x, y):
+    img = font.render(text, True, color)
+    screen.blit(img, (x, y))
+
+
+def enemy_mov():
+    if key[pygame.K_UP] and enemy.y > 10:
+        enemy.y -= VEL
+    elif key[pygame.K_DOWN] and enemy.y < 700 - HEIGHT - 20:
+        enemy.y += VEL
+
+
+def player_mov():
+    if key[pygame.K_w] and player.y > 10:
+        player.y -= VEL
+    elif key[pygame.K_s] and player.y < 700 - HEIGHT - 20:
+        player.y += VEL
+
+
+running = True
+while running:
+    fpsClock.tick(FPS)
+    key = pygame.key.get_pressed()
+    screen.fill((0, 0, 0))
+    player_mov()
+    enemy_mov()
+    ball_rect.move_ip(speed)
+    if ball_rect.colliderect(player):
+        player1_score += 1
+        speed[1] = -speed[1]
+        speed[0] = -speed[0]
+    if ball_rect.colliderect(enemy):
+        player2_score += 1
+        speed[1] = -speed[1]
+        speed[0] = -speed[0]
+    if ball_rect.y <= 30 or ball_rect.y >= 670:
+        speed[1] = -speed[1]
+    if ball_rect.x <= 30:
+        ball_rect.y = 350
+        ball_rect.x = 600
+        speed = [3, 3]
+        player2_score += 1
+    if ball_rect.x >= 1170:
+        ball_rect.y = 350
+        ball_rect.x = 600
+        speed = [-3, -3]
+        player1_score += 1
+    text_draw(f'P1 Score: {player1_score}', text_font, WHITE, 10, 10)
+    text_draw(f'P2 Score: {player2_score}', text_font, WHITE, 1020, 10)
+    text_draw('PONG', text_font, WHITE, 575, 10)
+    if player1_score == 10:
+        text_draw('Player 1 WINS', text_font, (128, 0, 128), 500, 350)
+        ball_rect.y = 285
+        ball_rect.x = 600
+        pygame.display.update()
+        sleep(2)
+        break
+    if player2_score == 10:
+        text_draw('Player 2 WINS', text_font, (128, 0, 128), 500, 350)
+        ball_rect.y = 285
+        ball_rect.x = 600
+        pygame.display.update()
+        sleep(2)
+        break
+    screen.blit(screen, ball_rect, ball)
+    ball = pygame.draw.circle(screen, (255, 0, 0), (ball_rect.x, ball_rect.y), 30)
+    pygame.draw.rect(screen, WHITE, player)
+    pygame.draw.rect(screen, WHITE, enemy)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    pygame.display.update()
+pygame.quit()
